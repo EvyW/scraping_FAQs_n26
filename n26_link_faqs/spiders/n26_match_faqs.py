@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
-
 class n26MatchFaqsSpider(scrapy.Spider):
+    
+    # name of the spider
     name = 'n26_match_faqs'
+    # URLs where the spider will begin to crawl from
     start_urls = ['https://support.n26.com/de-at/konto-und-personliche-informationen',
                     'https://support.n26.com/en-at/account-and-personal-details',
                     'https://support.n26.com/de-de/konto-und-personliche-informationen',
@@ -19,7 +21,9 @@ class n26MatchFaqsSpider(scrapy.Spider):
                     'https://support.n26.com/en-gb/account-and-personal-details',
                     ]
 
+    # 1. Crawling function
     def parse(self, response):
+        
         print('[parse] url:', response.url)
 
         # extract all links from page
@@ -31,19 +35,20 @@ class n26MatchFaqsSpider(scrapy.Spider):
             full_link = response.urljoin(link)
             yield scrapy.http.Request(url=full_link, callback=self.parse_page)
 
+    # 2. Scraping and Extracting function
     def parse_page(self, response):
+        
         #Extract data using xpath
         faq = response.selector.xpath('//h1/text()').extract()
-        row_data=zip(faq)
+        row_data=zip(faq) 
 
-        #Making extracted data row wise
+        #Make extracted data row wise
         for item in row_data:
             #create a dictionary to store the scraped info
             scraped_info = {
-                #key:value
                 'page':response.url,
-                'faq' : item[0], #item[0] means product in the list and so on, index tells what value to assign
+                'faq' : item[0],
             }
 
-            #yield or give the scraped info to scrapy
+            #give the scraped info to scrapy
             yield scraped_info
